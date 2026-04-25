@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YAS Content Team</title>
+
+  <style>
+    body { 
+      margin:0; 
+      font-family:'Segoe UI',sans-serif; 
+      background:#0f0f0f; 
+      color:#fff; 
+      text-align:center; 
+      overflow-y:auto;
+      min-height:100vh;
+    }
+
+    /* CINEMATIC INTRO */
+    #intro {
+      position:fixed; inset:0; background:#000; display:flex; align-items:center; justify-content:center; z-index:10000;
+      animation: introFade 2.5s forwards;
+    }
+    #intro img { width:140px; animation: zoomIn 2s ease; }
+    @keyframes zoomIn { from{transform:scale(0.5); opacity:0;} to{transform:scale(1.2); opacity:1;} }
+    @keyframes introFade { 0%,80%{opacity:1;} 100%{opacity:0; visibility:hidden;} }
+
+    /* BACKGROUND */
+    body::before {
+      content:''; position:fixed; width:200%; height:200%;
+      background: radial-gradient(circle, rgba(255,180,0,0.08), transparent);
+      animation: moveBg 12s linear infinite; z-index:-1;
+    }
+    @keyframes moveBg { 0%{transform:translate(0,0);} 50%{transform:translate(-25%,-25%);} 100%{transform:translate(0,0);} }
+
+    .container { padding:20px; max-width:900px; margin:auto; }
+
+    /* LOGO + PARTICLES */
+    .logo-wrap { position:relative; display:inline-block; }
+    .logo { width:140px; animation: floatLogo 3s ease-in-out infinite; }
+    @keyframes floatLogo { 0%{transform:translateY(0);} 50%{transform:translateY(-15px);} 100%{transform:translateY(0);} }
+
+    canvas { position:absolute; left:0; top:0; pointer-events:none; }
+
+    .title-3d {
+      font-size:2.8rem; font-weight:bold; color:#ffb400;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+    @keyframes glow { from{text-shadow:0 0 10px #ffb400;} to{text-shadow:0 0 25px #fff;} }
+
+    p { color:#ccc; }
+
+    select, textarea {
+      width:100%; padding:12px; margin-top:10px; border-radius:10px;
+      border:1px solid #333; background:#1a1a1a; color:#fff;
+    }
+
+    button {
+      width:100%; padding:14px; margin-top:15px; border-radius:12px;
+      border:none; background:linear-gradient(45deg,#ffb400,#ff8800);
+      color:#000; font-weight:bold; cursor:pointer;
+    }
+
+    .tasks { display:none; text-align:right; }
+
+    .task {
+      background:#1a1a1a; margin:10px 0; padding:12px;
+      border-radius:12px; border:1px solid #333;
+    }
+
+    .success {
+      display:none; margin-top:20px; font-size:18px; color:#ffb400;
+    }
+
+    .footer { margin-top:40px; font-size:14px; color:#888; }
+  </style>
+</head>
+
+<body>
+
+<!-- INTRO -->
+<div id="intro">
+  <img src="9999.jpeg">
+</div>
+
+<div class="container">
+
+  <div class="logo-wrap">
+    <img src="9999.jpeg" class="logo" id="logo">
+    <canvas id="particles"></canvas>
+  </div>
+
+  <div class="title-3d">Content Creators Team<br>at Yas Marketing Agency</div>
+  <p>قم بارسال مهامك اليومية للدكتور 🙆🏻‍♂️</p>
+
+  <form id="taskForm" action="https://formspree.io/f/mdayjzno" method="POST">
+
+    <select id="name" name="name" required>
+      <option value="">-- اختر اسمك --</option>
+      <option>يونس</option>
+      <option>عمرو</option>
+      <option>عبدالرحمن</option>
+      <option>رحمة</option>
+    </select>
+
+    <div class="tasks" id="tasks">
+      <h3 style="color:#ffb400">المهام</h3>
+      <div id="tasksContainer"></div>
+
+      <textarea name="note" placeholder="ادخل ملاحظة"></textarea>
+
+      <button type="submit">إرسال</button>
+    </div>
+
+  </form>
+
+  <div class="success" id="successMsg">
+    تم الارسال بنجاح يا اشطر كونتنت في الدنيا 😂
+  </div>
+
+  <div class="footer">Created by Mohamed Ezzat</div>
+
+</div>
+
+<!-- SOUND -->
+<audio id="successSound" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+
+<script>
+const nameSelect = document.getElementById('name');
+const tasksDiv = document.getElementById('tasks');
+const tasksContainer = document.getElementById('tasksContainer');
+const form = document.getElementById('taskForm');
+const successMsg = document.getElementById('successMsg');
+const sound = document.getElementById('successSound');
+
+const tasksData = {
+  "يونس": [
+    "تصميم بوست","كتابة كابشن","تصوير فيديو","تحليل منافسين","بحث ترندات",
+    "كتابة سكريبت","تعديل صور","نشر بوست","متابعة التعليقات","تحليل أداء",
+    "تصميم ستوري","عمل ريلز","أفكار محتوى","تطوير الهوية","تنظيم المحتوى"
+  ],
+
+  "عمرو": [
+    "عمل بلان أسبوعي","جدولة المحتوى","تحديد أهداف","تحليل بيانات","متابعة الحملات",
+    "تحسين الإعلانات","تقسيم الجمهور","اختبار محتوى","تخطيط ريلز","متابعة المنافسين",
+    "كتابة أفكار","توزيع المهام","تحليل نتائج","تعديل خطة","إدارة الوقت"
+  ],
+
+  "عبدالرحمن": [
+    "مونتاج فيديو","تعديل ألوان","إضافة مؤثرات","قص فيديوهات","تحسين الصوت",
+    "تصميم غلاف","رفع فيديو","تعديل ريلز","إخراج نهائي","تنظيم الملفات",
+    "إضافة نصوص","تعديل سرعة","تحسين الجودة","تحضير لقطات","مراجعة الفيديو"
+  ],
+
+  "رحمة": [
+    "الرد على العملاء","متابعة الرسائل","تنظيم الشات","تأكيد الطلبات","خدمة العملاء",
+    "حل المشاكل","متابعة الكومنتات","إرسال عروض","إدارة واتساب","متابعة الطلبات",
+    "كتابة ردود جاهزة","تحديث البيانات","التواصل مع الفريق","متابعة التسليم","تقييم العملاء"
+  ]
+};
+
+// عرض المهام
+nameSelect.addEventListener('change', () => {
+  tasksContainer.innerHTML = "";
+  const selectedName = nameSelect.value;
+
+  if (!selectedName) {
+    tasksDiv.style.display = 'none';
+    return;
+  }
+
+  tasksDiv.style.display = 'block';
+
+  const userTasks = tasksData[selectedName];
+
+  userTasks.forEach((taskName, index) => {
+    const task = document.createElement('div');
+    task.classList.add('task');
+
+    task.innerHTML = `
+      <p>${taskName}</p>
+      <label><input type="checkbox" name="${taskName} | Content"> كونتنت</label>
+      <label><input type="checkbox" name="${taskName} | Plan"> بلان</label>
+    `;
+
+    tasksContainer.appendChild(task);
+  });
+});
+
+// إرسال الفورم
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const formData = new FormData(form);
+
+  await fetch(form.action, {
+    method: "POST",
+    body: formData,
+    headers: { "Accept": "application/json" }
+  });
+
+  form.style.display = 'none';
+  successMsg.style.display = 'block';
+  sound.play();
+
+  setTimeout(() => {
+    location.reload();
+  }, 5000);
+});
+</script>
+
+</body>
+</html>
